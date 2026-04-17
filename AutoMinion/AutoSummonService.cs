@@ -71,11 +71,13 @@ internal sealed class AutoSummonService : IDisposable
     private void OnTerritoryChanged(ushort territoryId)
     {
         _ = territoryId;
+        QueueCurrentJobSummonIfNeeded();
         TryProcessPendingSummon();
     }
 
     private void OnLogin()
     {
+        QueueCurrentJobSummonIfNeeded();
         TryProcessPendingSummon();
     }
 
@@ -90,8 +92,11 @@ internal sealed class AutoSummonService : IDisposable
             ConditionFlag.Mounted or
             ConditionFlag.RidingPillion or
             ConditionFlag.Mounting or
-            ConditionFlag.MountOrOrnamentTransition)
+            ConditionFlag.MountOrOrnamentTransition or
+            ConditionFlag.BetweenAreas or
+            ConditionFlag.BetweenAreas51)
         {
+            QueueCurrentJobSummonIfNeeded();
             TryProcessPendingSummon();
         }
     }
@@ -156,6 +161,29 @@ internal sealed class AutoSummonService : IDisposable
     {
         var assignment = autoMinion.Configuration.Assignments.Find(entry => entry.JobId == classJobId);
         return assignment?.MinionId;
+    }
+
+    private void QueueCurrentJobSummonIfNeeded()
+    {
+        var currentJobId = GetCurrentJobId();
+        if (!currentJobId.HasValue)
+        {
+            return;
+        }
+
+        var configuredMinionId = ResolveConfiguredMinion(currentJobId.Value);
+        if (!configuredMinionId.HasValue)
+        {
+            return;
+        }
+
+        if (GetCurrentActiveMinionId() == configuredMinionId.Value)
+        {
+            ClearPendingSummon();
+            return;
+        }
+
+        QueuePendingSummon(currentJobId.Value, configuredMinionId.Value);
     }
 
     private static bool CanAttemptAutoSummon()
