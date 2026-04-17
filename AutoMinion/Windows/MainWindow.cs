@@ -76,15 +76,6 @@ public class MainWindow : Window, IDisposable
             autoMinion.Configuration.EnableChatOutput = enableChatOutput;
             autoMinion.Configuration.Save();
         }
-
-        // ImGui.SameLine();
-        // if (ImGui.Button("Test Summon Fat Cat (110)"))
-        // {
-        //     var wasSent = TryTestSummonFatCat();
-        //     AutoMinion.ChatGui.Print(wasSent
-        //         ? "[AutoMinion] Test action sent for Fat Cat (110)."
-        //         : "[AutoMinion] Failed to send Fat Cat test action.");
-        // }
     }
 
     private void DrawAddJobCombo(List<JobEntry> availableJobs)
@@ -180,14 +171,8 @@ public class MainWindow : Window, IDisposable
         }
 
         ImGui.SetNextItemWidth(-1f);
-        if (ImGui.InputTextWithHint(searchId, "Search minions", ref searchText, 100))
-        {
-            minionSearchTexts[assignment.JobId] = searchText;
-        }
-        else
-        {
-            minionSearchTexts[assignment.JobId] = searchText;
-        }
+        ImGui.InputTextWithHint(searchId, "Search minions", ref searchText, 100);
+        minionSearchTexts[assignment.JobId] = searchText;
 
         ImGui.Separator();
 
@@ -233,21 +218,6 @@ public class MainWindow : Window, IDisposable
     private void LoadMinions(bool forceReload = false)
     {
         ownedMinions = autoMinion.MinionService.GetOwnedMinions(forceReload);
-        var hasChanges = false;
-
-        foreach (var assignment in autoMinion.Configuration.Assignments)
-        {
-            if (assignment.MinionId.HasValue && ownedMinions.TrueForAll(minion => minion.Id != assignment.MinionId.Value))
-            {
-                assignment.MinionId = null;
-                hasChanges = true;
-            }
-        }
-
-        if (hasChanges)
-        {
-            autoMinion.Configuration.Save();
-        }
     }
 
     private List<JobEntry> GetAvailableJobs()
@@ -349,10 +319,5 @@ public class MainWindow : Window, IDisposable
         }
 
         return $"AutoMinion v{version}";
-    }
-
-    private static unsafe bool TryTestSummonFatCat()
-    {
-        return AutoSummonService.TrySummonMinion(110);
     }
 }

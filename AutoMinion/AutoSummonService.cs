@@ -1,5 +1,6 @@
 using System;
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
@@ -9,6 +10,7 @@ internal sealed class AutoSummonService : IDisposable
 {
     private static readonly TimeSpan DuplicateSummonWindow = TimeSpan.FromSeconds(2);
     private static readonly TimeSpan RetryAttemptWindow = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan PendingPollWindow = TimeSpan.FromSeconds(1);
 
     private readonly AutoMinion autoMinion;
     private uint lastTriggeredJobId;
@@ -19,6 +21,7 @@ internal sealed class AutoSummonService : IDisposable
     private uint lastAttemptedJobId;
     private uint lastAttemptedMinionId;
     private DateTime lastAttemptedAtUtc = DateTime.MinValue;
+    private DateTime lastPendingPollAtUtc = DateTime.MinValue;
 
     public AutoSummonService(AutoMinion autoMinion)
     {
@@ -27,6 +30,10 @@ internal sealed class AutoSummonService : IDisposable
         AutoMinion.ClientState.TerritoryChanged += OnTerritoryChanged;
         AutoMinion.ClientState.Login += OnLogin;
         AutoMinion.Condition.ConditionChange += OnConditionChange;
+        AutoMinion.Framework.Update += OnFrameworkUpdate;
+
+        QueueCurrentJobSummonIfNeeded();
+        TryProcessPendingSummon();
     }
 
     public void Dispose()
@@ -35,6 +42,7 @@ internal sealed class AutoSummonService : IDisposable
         AutoMinion.ClientState.TerritoryChanged -= OnTerritoryChanged;
         AutoMinion.ClientState.Login -= OnLogin;
         AutoMinion.Condition.ConditionChange -= OnConditionChange;
+        AutoMinion.Framework.Update -= OnFrameworkUpdate;
     }
 
     internal static unsafe bool TrySummonMinion(uint minionId)
@@ -101,6 +109,24 @@ internal sealed class AutoSummonService : IDisposable
         }
     }
 
+    private void OnFrameworkUpdate(IFramework framework)
+    {
+        _ = framework;
+        if (!pendingJobId.HasValue || !pendingMinionId.HasValue)
+        {
+            return;
+        }
+
+        if (DateTime.UtcNow - lastPendingPollAtUtc < PendingPollWindow)
+        {
+            return;
+        }
+
+        lastPendingPollAtUtc = DateTime.UtcNow;
+        QueueCurrentJobSummonIfNeeded();
+        TryProcessPendingSummon();
+    }
+
     private void TryProcessPendingSummon()
     {
         if (!pendingJobId.HasValue || !pendingMinionId.HasValue)
@@ -157,7 +183,6 @@ internal sealed class AutoSummonService : IDisposable
         {
             AutoMinion.ChatGui.Print($"[AutoMinion] Sent summon action for minion {pendingMinionId.Value}.");
         }
-        ClearPendingSummon();
     }
 
     private uint? ResolveConfiguredMinion(uint classJobId)
@@ -240,6 +265,7 @@ internal sealed class AutoSummonService : IDisposable
     {
         pendingJobId = classJobId;
         pendingMinionId = minionId;
+        lastPendingPollAtUtc = DateTime.MinValue;
     }
 
     private void ClearPendingSummon()
