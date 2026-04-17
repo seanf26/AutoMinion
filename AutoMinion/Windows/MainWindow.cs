@@ -64,7 +64,7 @@ public class MainWindow : Window, IDisposable
         DrawAddJobCombo(availableJobs);
 
         ImGui.SameLine();
-        if (ImGui.Button("Refresh Minions"))
+        if (ImGui.Button("Refresh"))
         {
             LoadMinions(forceReload: true);
         }
@@ -90,7 +90,7 @@ public class MainWindow : Window, IDisposable
     private void DrawAddJobCombo(List<JobEntry> availableJobs)
     {
         var previewText = GetAddJobPreview(availableJobs);
-        if (!ImGui.BeginCombo("Add Job", previewText))
+        if (!ImGui.BeginCombo("##AddJob", previewText))
         {
             return;
         }
