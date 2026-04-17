@@ -1,0 +1,19 @@
+﻿[
+  {
+    "Author": "seanf26",
+    "Name": "AutoMinion",
+    "Punchline": "Automatically summon your chosen minion when switching jobs.",
+    "Description": "Lets you assign a minion per job and handles summoning for you on job change. Uses a searchable list of your owned minions and intelligently waits if summoning isn't currently possible.",
+    "Tags": [ "Visor", "minion", "minions", "ui", "utlity" ],
+    "InternalName": "AutoMinion",
+    "AssemblyVersion": "1.0.0.0",
+    "TestingAssemblyVersion": "1.0.0.0",
+    "RepoUrl": "https://github.com/seanf26/AutoMinion",
+    "ApplicableVersion": "any",
+    "DalamudApiLevel": 14,
+    "IsHide": "False",
+    "DownloadLinkInstall": "https://github.com/seanf26/AutoMinion/releases/latest/download/AutoMinion.zip",
+    "DownloadLinkUpdate": "https://github.com/seanf26/AutoMinion/releases/latest/download/AutoMinion.zip",
+    "IconUrl": "https://raw.githubusercontent.com/seanf26/AutoMinion/main/Data/AutoMinion.png"
+  }
+]
