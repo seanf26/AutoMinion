@@ -17,7 +17,7 @@ public class MainWindow : Window, IDisposable
     private List<MinionEntry> ownedMinions = [];
 
     public MainWindow(AutoMinion autoMinion)
-        : base("AutoMinion v1.0.0##AutoMinionAssignments")
+        : base("AutoMinion v1.1.0##AutoMinionAssignments")
     {
         SizeConstraints = new WindowSizeConstraints
         {
