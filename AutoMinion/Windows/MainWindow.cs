@@ -17,7 +17,7 @@ public class MainWindow : Window, IDisposable
     private List<MinionEntry> ownedMinions = [];
 
     public MainWindow(AutoMinion autoMinion)
-        : base("AutoMinion v1.1.0##AutoMinionAssignments")
+        : base(BuildWindowTitle() + "##AutoMinionAssignments")
     {
         SizeConstraints = new WindowSizeConstraints
         {
@@ -67,6 +67,14 @@ public class MainWindow : Window, IDisposable
         if (ImGui.Button("Refresh Minions"))
         {
             LoadMinions(forceReload: true);
+        }
+
+        ImGui.SameLine();
+        var enableChatOutput = autoMinion.Configuration.EnableChatOutput;
+        if (ImGui.Checkbox("Enable Chat Output", ref enableChatOutput))
+        {
+            autoMinion.Configuration.EnableChatOutput = enableChatOutput;
+            autoMinion.Configuration.Save();
         }
 
         // ImGui.SameLine();
@@ -330,6 +338,17 @@ public class MainWindow : Window, IDisposable
     private static string FormatJob(JobEntry job)
     {
         return $"{job.Abbreviation} - {job.Name}";
+    }
+
+    private static string BuildWindowTitle()
+    {
+        var version = AutoMinion.PluginInterface.Manifest.AssemblyVersion?.ToString() ?? "0.0.0.0";
+        if (version.EndsWith(".0", StringComparison.Ordinal))
+        {
+            version = version[..^2];
+        }
+
+        return $"AutoMinion v{version}";
     }
 
     private static unsafe bool TryTestSummonFatCat()

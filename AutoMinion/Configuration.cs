@@ -10,6 +10,7 @@ public class Configuration : IPluginConfiguration
     public int Version { get; set; } = 0;
 
     public List<JobMinionAssignment> Assignments { get; set; } = [];
+    public bool EnableChatOutput { get; set; } = false;
 
     public void Save()
     {

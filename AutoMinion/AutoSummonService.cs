@@ -153,7 +153,10 @@ internal sealed class AutoSummonService : IDisposable
         lastTriggeredJobId = pendingJobId.Value;
         lastTriggeredMinionId = pendingMinionId.Value;
         lastTriggeredAtUtc = DateTime.UtcNow;
-        AutoMinion.ChatGui.Print($"[AutoMinion] Sent summon action for minion {pendingMinionId.Value}.");
+        if (autoMinion.Configuration.EnableChatOutput)
+        {
+            AutoMinion.ChatGui.Print($"[AutoMinion] Sent summon action for minion {pendingMinionId.Value}.");
+        }
         ClearPendingSummon();
     }
 
