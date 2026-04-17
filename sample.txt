@@ -1,1 +1,0 @@
-AutoMinion workspace path check.
