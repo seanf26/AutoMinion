@@ -21,12 +21,6 @@ AutoMinion is a Dalamud plugin that automatically changes your minion when you s
 5. Open the AutoMinion configuration via plugin settings or `/autominion`
 6. Add a job row and select a minion for that job
 
-## Notes
-
-- Minions are only changed when switching jobs, not continuously
-- The plugin will not override game restrictions on summoning
-- If a summon fails due to game state, it will retry shortly after
-
 ## Disclaimer
 
 This was built primarily for personal use to avoid maintaining macros for each job.
