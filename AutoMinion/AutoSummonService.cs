@@ -22,6 +22,7 @@ internal sealed class AutoSummonService : IDisposable
     private uint lastAttemptedMinionId;
     private DateTime lastAttemptedAtUtc = DateTime.MinValue;
     private DateTime lastPendingPollAtUtc = DateTime.MinValue;
+    private bool pendingStartupCheck = true;
 
     public AutoSummonService(AutoMinion autoMinion)
     {
@@ -31,9 +32,6 @@ internal sealed class AutoSummonService : IDisposable
         AutoMinion.ClientState.Login += OnLogin;
         AutoMinion.Condition.ConditionChange += OnConditionChange;
         AutoMinion.Framework.Update += OnFrameworkUpdate;
-
-        QueueCurrentJobSummonIfNeeded();
-        TryProcessPendingSummon();
     }
 
     public void Dispose()
@@ -112,6 +110,13 @@ internal sealed class AutoSummonService : IDisposable
     private void OnFrameworkUpdate(IFramework framework)
     {
         _ = framework;
+        if (pendingStartupCheck)
+        {
+            pendingStartupCheck = false;
+            QueueCurrentJobSummonIfNeeded();
+            TryProcessPendingSummon();
+        }
+
         if (!pendingJobId.HasValue || !pendingMinionId.HasValue)
         {
             return;
