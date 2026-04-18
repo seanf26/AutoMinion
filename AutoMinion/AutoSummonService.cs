@@ -8,7 +8,7 @@ namespace AutoMinion;
 
 internal sealed class AutoSummonService : IDisposable
 {
-    private static readonly TimeSpan DuplicateSummonWindow = TimeSpan.FromSeconds(2);
+    private static readonly TimeSpan DuplicateSummonWindow = TimeSpan.FromSeconds(3);
     private static readonly TimeSpan RetryAttemptWindow = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan PendingPollWindow = TimeSpan.FromSeconds(1);
 
@@ -184,9 +184,10 @@ internal sealed class AutoSummonService : IDisposable
         lastTriggeredJobId = pendingJobId.Value;
         lastTriggeredMinionId = pendingMinionId.Value;
         lastTriggeredAtUtc = DateTime.UtcNow;
+        ClearPendingSummon();
         if (autoMinion.Configuration.EnableChatOutput)
         {
-            var minionId = pendingMinionId.Value;
+            var minionId = lastTriggeredMinionId;
             var minionName = autoMinion.MinionService.GetMinionName(minionId) ?? "unknown minion";
             AutoMinion.ChatGui.Print($"[AutoMinion] Summoned {minionName} ({minionId}).");
         }
