@@ -83,4 +83,10 @@ internal sealed class MinionService
         LoadState = MinionLoadState.Ready;
         return [.. cachedOwnedMinions];
     }
+
+    public string? GetMinionName(uint minionId)
+    {
+        var cachedMinion = cachedOwnedMinions.Find(minion => minion.Id == minionId);
+        return cachedMinion?.Name;
+    }
 }

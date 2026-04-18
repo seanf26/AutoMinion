@@ -181,7 +181,9 @@ internal sealed class AutoSummonService : IDisposable
         lastTriggeredAtUtc = DateTime.UtcNow;
         if (autoMinion.Configuration.EnableChatOutput)
         {
-            AutoMinion.ChatGui.Print($"[AutoMinion] Sent summon action for minion {pendingMinionId.Value}.");
+            var minionId = pendingMinionId.Value;
+            var minionName = autoMinion.MinionService.GetMinionName(minionId) ?? "unknown minion";
+            AutoMinion.ChatGui.Print($"[AutoMinion] Summoned {minionName} ({minionId}).");
         }
     }
 

@@ -76,6 +76,11 @@ public class MainWindow : Window, IDisposable
             autoMinion.Configuration.EnableChatOutput = enableChatOutput;
             autoMinion.Configuration.Save();
         }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Allows AutoMinion to write summoning results into the game chat.");
+        }
     }
 
     private void DrawAddJobCombo(List<JobEntry> availableJobs)
