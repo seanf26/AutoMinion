@@ -11,6 +11,7 @@ internal sealed class AutoSummonService : IDisposable
     private static readonly TimeSpan DuplicateSummonWindow = TimeSpan.FromSeconds(3);
     private static readonly TimeSpan RetryAttemptWindow = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan PendingPollWindow = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan FashionAccessoryGraceWindow = TimeSpan.FromSeconds(2);
 
     private readonly AutoMinion autoMinion;
     private uint lastTriggeredJobId;
@@ -22,6 +23,7 @@ internal sealed class AutoSummonService : IDisposable
     private uint lastAttemptedMinionId;
     private DateTime lastAttemptedAtUtc = DateTime.MinValue;
     private DateTime lastPendingPollAtUtc = DateTime.MinValue;
+    private DateTime fashionAccessoryEndedAtUtc = DateTime.MinValue;
     private bool pendingStartupCheck = true;
 
     public AutoSummonService(AutoMinion autoMinion)
@@ -89,6 +91,11 @@ internal sealed class AutoSummonService : IDisposable
 
     private void OnConditionChange(ConditionFlag flag, bool value)
     {
+        if (flag == ConditionFlag.UsingFashionAccessory && !value)
+        {
+            fashionAccessoryEndedAtUtc = DateTime.UtcNow;
+        }
+
         if (value)
         {
             return;
@@ -163,14 +170,24 @@ internal sealed class AutoSummonService : IDisposable
             return;
         }
 
+        if (DateTime.UtcNow - fashionAccessoryEndedAtUtc < FashionAccessoryGraceWindow)
+        {
+            return;
+        }
+
         if (GetCurrentActiveMinionId() == pendingMinionId.Value)
         {
             ClearPendingSummon();
             return;
         }
 
-        if (IsDuplicateTrigger(pendingJobId.Value, pendingMinionId.Value) ||
-            IsAttemptThrottled(pendingJobId.Value, pendingMinionId.Value))
+        if (IsDuplicateTrigger(pendingJobId.Value, pendingMinionId.Value))
+        {
+            ClearPendingSummon();
+            return;
+        }
+
+        if (IsAttemptThrottled(pendingJobId.Value, pendingMinionId.Value))
         {
             return;
         }
@@ -214,6 +231,12 @@ internal sealed class AutoSummonService : IDisposable
         }
 
         if (GetCurrentActiveMinionId() == configuredMinionId.Value)
+        {
+            ClearPendingSummon();
+            return;
+        }
+
+        if (IsDuplicateTrigger(currentJobId.Value, configuredMinionId.Value))
         {
             ClearPendingSummon();
             return;
